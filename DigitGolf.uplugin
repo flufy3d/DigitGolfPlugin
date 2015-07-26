@@ -1,0 +1,18 @@
+{
+	"FileVersion": 3,
+	"FriendlyName": "DigitGolf",
+	"Version": 1,
+	"VersionName": "1.0",
+	"CreatedBy": "flufy3d",
+	"CreatedByURL": "",
+	"Category": "Other",
+	"Description": "DigitGolf Scene Import",
+	"EnabledByDefault": false,
+	"Modules": [
+		{
+			"Name": "DigitGolf",
+			"Type": "Developer",
+			"LoadingPhase": "Default"
+		}
+	]
+}

@@ -103,7 +103,13 @@ void FDigitGolfModule::ImportScene(const FString& path)
 	
 		//myactor->Rename(TEXT("kenshin1987"));
 		myactor->SetActorLabel(TEXT("kenshin1987"));
-	
+
+		AActor* child = World->SpawnActor<AActor>(FVector::ForwardVector, FRotator::ZeroRotator);
+		child->AttachRootComponentToActor(myactor);
+
+		FText reason;
+		GEditor->CanParentActors(myactor, child, &reason);
+		UE_LOG(LogDigitGolf, Log, TEXT("%s"), *reason.ToString());
 		//this code must in construct fucntion
 		//USceneComponent* MyUSceneComponent = myactor->CreateDefaultSubobject<USceneComponent>(TEXT("RootSceneComponent"));
 		//myactor->SetRootComponent(MyUSceneComponent);

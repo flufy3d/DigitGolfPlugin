@@ -101,8 +101,9 @@ void FDigitGolfModule::ImportScene(const FString& path)
 
 		myactor = World->SpawnActor<AActor>(FVector::ForwardVector, FRotator::ZeroRotator);
 	
-		myactor->Rename(TEXT("kenshin1987"));
+		//myactor->Rename(TEXT("kenshin1987"));
 		myactor->SetActorLabel(TEXT("kenshin1987"));
+	
 		//this code must in construct fucntion
 		//USceneComponent* MyUSceneComponent = myactor->CreateDefaultSubobject<USceneComponent>(TEXT("RootSceneComponent"));
 		//myactor->SetRootComponent(MyUSceneComponent);

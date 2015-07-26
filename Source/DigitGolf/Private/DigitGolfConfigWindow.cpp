@@ -4,6 +4,8 @@
 
 #define LOCTEXT_NAMESPACE "FDigitGolfModule"
 
+FString SDigitGolfConfigWindow::FilePath = FString(TEXT("Path/scene.json"));
+
 void SDigitGolfConfigWindow::Construct(const FArguments& InArgs)
 {
 	ChildSlot
@@ -39,7 +41,6 @@ void SDigitGolfConfigWindow::Construct(const FArguments& InArgs)
 			]
 		]
 	];
-	FilePath = FString(TEXT("Path/scene.json"));
 
 }
 

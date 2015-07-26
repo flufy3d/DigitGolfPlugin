@@ -13,6 +13,6 @@ public:
 	FText GetFilePath() const;
 
 private:
-	FString FilePath;
+	static FString FilePath;
 	
 };

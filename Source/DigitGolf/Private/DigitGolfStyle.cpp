@@ -42,7 +42,7 @@ const FVector2D Icon40x40(40.0f, 40.0f);
 TSharedRef< FSlateStyleSet > FDigitGolfStyle::Create()
 {
 	TSharedRef< FSlateStyleSet > Style = MakeShareable(new FSlateStyleSet("DigitGolfStyle"));
-	Style->SetContentRoot(IPluginManager::Get().FindPlugin("DigitGolf")->GetBaseDir() / TEXT("Resources"));
+	Style->SetContentRoot(IPluginManager::Get().FindPlugin("DigitGolfPlugin")->GetBaseDir() / TEXT("Resources"));
 
 	Style->Set("DigitGolf.OpenPluginWindow", new IMAGE_BRUSH(TEXT("ButtonIcon_40x"), Icon40x40));
 

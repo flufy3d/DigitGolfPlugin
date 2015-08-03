@@ -40,6 +40,7 @@ public class DigitGolf : ModuleRules
 			{
 				"Projects",
                 "Json",
+                "DesktopPlatform",
                 "CoreUObject",
 				"InputCore",
 				"UnrealEd",

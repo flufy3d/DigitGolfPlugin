@@ -6,6 +6,8 @@
 #include "SlateBasics.h"
 #include "SlateExtras.h"
 #include "Json.h"
+#include "IDesktopPlatform.h"
+#include "DesktopPlatformModule.h"
 
 #include "DigitGolfStyle.h"
 #include "DigitGolfCommands.h"
@@ -142,6 +144,25 @@ void FDigitGolfModule::PluginButtonClicked()
 	FGlobalTabmanager::Get()->InvokeTab(DigitGolfTabName);
 	FindRelativeFactory();
 }
+
+TSharedPtr<FJsonObject> LoadProjectFile(const FString &FileName)
+{
+	FString FileContents;
+
+	if (!FFileHelper::LoadFileToString(FileContents, *FileName))
+	{
+		return TSharedPtr<FJsonObject>(NULL);
+	}
+
+	TSharedPtr< FJsonObject > JsonObject;
+	TSharedRef< TJsonReader<> > Reader = TJsonReaderFactory<>::Create(FileContents);
+	if (!FJsonSerializer::Deserialize(Reader, JsonObject) || !JsonObject.IsValid())
+	{
+		return TSharedPtr<FJsonObject>(NULL);
+	}
+
+	return JsonObject;
+}
 void FDigitGolfModule::ImportScene(const FString& path)
 {
 	UE_LOG(LogDigitGolf, Log, TEXT("ImportScene"));
@@ -154,6 +175,38 @@ void FDigitGolfModule::ImportScene(const FString& path)
 	if (path.Equals("Add"))
 	{
 		UE_LOG(LogDigitGolf, Log, TEXT("ImportScene"));
+
+		TArray<FString> file_path;
+
+		void* ParentWindowPtr = FSlateApplication::Get().GetActiveTopLevelWindow()->GetNativeWindow()->GetOSWindowHandle();
+
+		if (ParentWindowPtr)
+		{
+			IDesktopPlatform* DesktopPlatform = FDesktopPlatformModule::Get();
+
+			if (DesktopPlatform)
+			{
+				FString FileTypes = TEXT("Images (*.json)|*.json|All Files (*.*)|*.*");
+
+				DesktopPlatform->OpenFileDialog(
+					ParentWindowPtr,
+					"ChooseSceneFile",
+					TEXT(""),
+					TEXT(""),
+					FileTypes,
+					EFileDialogFlags::None,
+					file_path
+					);
+			}
+
+			TSharedPtr<FJsonObject> ProjectFile = LoadProjectFile(file_path[0]);
+			if (!ProjectFile.IsValid())
+			{
+				int a = 1 + 1;
+			}
+
+		}
+
 
 		//UObject* Asset = GetAssetFromPath("/Script/Engine.Actor");
 		FString path = TEXT("/Game/NineDragonsA/Object/o_jiulongrock3_.o_jiulongrock3_");

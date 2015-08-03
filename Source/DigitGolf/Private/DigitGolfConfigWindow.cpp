@@ -38,6 +38,14 @@ void SDigitGolfConfigWindow::Construct(const FArguments& InArgs)
 					.OnTextCommitted(this, &SDigitGolfConfigWindow::OnPortTextChanged)
 					.OnTextChanged(this, &SDigitGolfConfigWindow::OnPortTextChanged, ETextCommit::Default)
 				]
+				+ SHorizontalBox::Slot()
+				.AutoWidth()
+				.Padding(2.0f)
+				[
+					SNew(SButton)
+					.Text(LOCTEXT("ChooseFile", "..."))
+					.OnClicked(this, &SDigitGolfConfigWindow::OnImportBtn)
+				]
 			]
 		]
 	];

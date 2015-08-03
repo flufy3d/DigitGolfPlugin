@@ -154,23 +154,30 @@ void FDigitGolfModule::ImportScene(const FString& path)
 	{
 		UE_LOG(LogDigitGolf, Log, TEXT("ImportScene"));
 
-		UObject* Asset = GetAssetFromPath("/Script/Engine.Actor");
+		//UObject* Asset = GetAssetFromPath("/Script/Engine.Actor");
+		FString path = TEXT("/Game/NineDragonsA/Object/o_jiulongrock3_.o_jiulongrock3_");
+		UObject* Asset = GetAssetFromPath(path);
 		if (Asset == NULL)
+		{
+			UE_LOG(LogDigitGolf, Log, TEXT("can not found asset: %s"),*path);
 			return;
+		}
+			
 		const FAssetData AssetData(Asset);
 
 		FText ErrorMessage;
 		AActor* Actor = NULL;
 
-		if (EmptyActorFactory->CanCreateActorFrom(AssetData, ErrorMessage))
+		if (StaticMeshActorFactory->CanCreateActorFrom(AssetData, ErrorMessage))
 		{
-			Actor = EmptyActorFactory->CreateActor(Asset, Level, FTransform::Identity,
+			Actor = StaticMeshActorFactory->CreateActor(Asset, Level, FTransform::Identity,
 				RF_Transactional);
 
 			Actor->SetActorLabel(TEXT("kenshin1987"));
 
-			//Actor = FindObject<AActor>(Level, TEXT("kenshin1987"), false);
-
+			Actor->SetActorLocation(FVector(0, 100,261));
+			Actor->SetActorRotation(FRotator(0, 0, 90));
+			Actor->SetActorScale3D(FVector(2, 2, 2));
 			myactor = Actor;
 
 		}

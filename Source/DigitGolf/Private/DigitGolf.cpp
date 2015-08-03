@@ -19,6 +19,60 @@ static const FName DigitGolfTabName("DigitGolf");
 
 #define LOCTEXT_NAMESPACE "FDigitGolfModule"
 
+UObject* GetAssetFromPath(FString AssetPath)
+{
+	// If there is no dot, add a dot and repeat the object name.
+	// /Game/Meshes/MyStaticMesh.MyStaticMesh would be the actual path
+	// to the object, while the MyStaticMesh before the dot is the package
+	// copied from ConstructorHelpers
+	int32 PackageDelimPos = INDEX_NONE;
+	AssetPath.FindChar(TCHAR('.'), PackageDelimPos);
+	if (PackageDelimPos == INDEX_NONE)
+	{
+		int32 ObjectNameStart = INDEX_NONE;
+		AssetPath.FindLastChar(TCHAR('/'), ObjectNameStart);
+		if (ObjectNameStart != INDEX_NONE)
+		{
+			const FString ObjectName = AssetPath.Mid(ObjectNameStart + 1);
+			AssetPath += TCHAR('.');
+			AssetPath += ObjectName;
+		}
+	}
+
+
+	// try to find the asset
+	UE_LOG(LogDigitGolf, Log, TEXT("Trying to find Asset %s."), *AssetPath);
+	//UObject* Asset = FindObject<UObject>( ANY_PACKAGE, *AssetPath, false );
+	UObject* Asset = StaticLoadObject(UObject::StaticClass(), NULL, *AssetPath);
+	if (Asset == NULL)
+	{
+		UE_LOG(LogDigitGolf, Log, TEXT("Failed to find Asset %s."), *AssetPath);
+		return NULL;
+	}
+	return Asset;
+}
+
+void FDigitGolfModule::FindRelativeFactory()
+{
+	for (UActorFactory* ActorFactory : GEditor->ActorFactories)
+	{
+		const FString& fac_name = ActorFactory->GetFName().ToString();
+		if (fac_name.Equals("ActorFactoryStaticMesh_0") )
+		{
+			StaticMeshActorFactory = ActorFactory;
+			UE_LOG(LogDigitGolf, Log, TEXT("load %s"), *(ActorFactory->GetFName().ToString()));
+		}
+		else if (fac_name.Equals("ActorFactoryEmptyActor_0") )
+		{
+			EmptyActorFactory = ActorFactory;
+			UE_LOG(LogDigitGolf, Log, TEXT("load %s"), *(ActorFactory->GetFName().ToString()));
+		}
+		
+		
+		
+	}
+}
+
 void FDigitGolfModule::StartupModule()
 {
 	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
@@ -54,7 +108,7 @@ void FDigitGolfModule::StartupModule()
 	FGlobalTabmanager::Get()->RegisterNomadTabSpawner(DigitGolfTabName, FOnSpawnTab::CreateRaw(this, &FDigitGolfModule::OnSpawnPluginTab))
 		.SetDisplayName(LOCTEXT("FDigitGolfTabTitle", "DigitGolf"))
 		.SetMenuType(ETabSpawnerMenuType::Hidden);
-	
+
 }
 
 void FDigitGolfModule::ShutdownModule()
@@ -85,35 +139,45 @@ TSharedRef<SDockTab> FDigitGolfModule::OnSpawnPluginTab(const FSpawnTabArgs& Spa
 void FDigitGolfModule::PluginButtonClicked()
 {
 	FGlobalTabmanager::Get()->InvokeTab(DigitGolfTabName);
+	FindRelativeFactory();
 }
 void FDigitGolfModule::ImportScene(const FString& path)
 {
 	UE_LOG(LogDigitGolf, Log, TEXT("ImportScene"));
 	UE_LOG(LogDigitGolf, Log, TEXT("___ %s ____ "), *path);
 
+	auto World = GEditor->GetEditorWorldContext().World();
+	ULevel* Level = World->GetCurrentLevel();
 
 	static AActor* myactor;
 	if (path.Equals("Add"))
 	{
 		UE_LOG(LogDigitGolf, Log, TEXT("ImportScene"));
-		auto World = GEditor->GetEditorWorldContext().World();
-		ULevel* Level = World->GetCurrentLevel();
 
-		myactor = World->SpawnActor<AActor>(FVector::ForwardVector, FRotator::ZeroRotator);
-	
-		//myactor->Rename(TEXT("kenshin1987"));
-		myactor->SetActorLabel(TEXT("kenshin1987"));
+		UObject* Asset = GetAssetFromPath("/Script/Engine.Actor");
+		if (Asset == NULL)
+			return;
+		const FAssetData AssetData(Asset);
 
-		AActor* child = World->SpawnActor<AActor>(FVector::ForwardVector, FRotator::ZeroRotator);
-		child->AttachRootComponentToActor(myactor);
+		FText ErrorMessage;
+		AActor* Actor = NULL;
 
-		FText reason;
-		GEditor->CanParentActors(myactor, child, &reason);
-		UE_LOG(LogDigitGolf, Log, TEXT("%s"), *reason.ToString());
-		//this code must in construct fucntion
-		//USceneComponent* MyUSceneComponent = myactor->CreateDefaultSubobject<USceneComponent>(TEXT("RootSceneComponent"));
-		//myactor->SetRootComponent(MyUSceneComponent);
+		if (EmptyActorFactory->CanCreateActorFrom(AssetData, ErrorMessage))
+		{
+			Actor = EmptyActorFactory->CreateActor(Asset, Level, FTransform::Identity,
+				RF_Transactional);
 
+			Actor->SetActorLabel(TEXT("kenshin1987"));
+
+			//Actor = FindObject<AActor>(Level, TEXT("kenshin1987"), false);
+
+			myactor = Actor;
+
+		}
+		else
+		{
+			UE_LOG(LogDigitGolf, Log, TEXT("error_msg :%s"), *ErrorMessage.ToString());
+		}
 
 	}
 	else if (path.Equals("Del"))

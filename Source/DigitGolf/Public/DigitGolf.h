@@ -9,6 +9,7 @@ DECLARE_LOG_CATEGORY_EXTERN(LogDigitGolf, Log, All);
 
 class FToolBarBuilder;
 class FMenuBuilder;
+class UActorFactory;
 
 class FDigitGolfModule : 
 	public IModuleInterface
@@ -34,8 +35,14 @@ private:
 	void AddToolbarExtension(FToolBarBuilder& Builder);
 	void AddMenuExtension(FMenuBuilder& Builder);
 
+	void FindRelativeFactory();
+
 	TSharedRef<class SDockTab> OnSpawnPluginTab(const class FSpawnTabArgs& SpawnTabArgs);
 
 private:
 	TSharedPtr<class FUICommandList> PluginCommands;
+
+	UActorFactory* EmptyActorFactory;
+
+	UActorFactory* StaticMeshActorFactory;
 };

@@ -5,6 +5,7 @@
 #include "GameFramework/Actor.h"
 #include "SlateBasics.h"
 #include "SlateExtras.h"
+#include "Json.h"
 
 #include "DigitGolfStyle.h"
 #include "DigitGolfCommands.h"

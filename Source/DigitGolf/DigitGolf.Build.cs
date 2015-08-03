@@ -39,6 +39,7 @@ public class DigitGolf : ModuleRules
 			new string[]
 			{
 				"Projects",
+                "Json",
                 "CoreUObject",
 				"InputCore",
 				"UnrealEd",

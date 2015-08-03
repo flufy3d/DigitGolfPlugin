@@ -23,14 +23,6 @@ void SDigitGolfConfigWindow::Construct(const FArguments& InArgs)
 				.AutoWidth()
 				.Padding(2.0f)
 				[
-					SNew(SButton)
-					.Text(LOCTEXT("ImportBtn", "Import Scene"))
-					.OnClicked(this, &SDigitGolfConfigWindow::OnImportBtn)
-				]
-				+SHorizontalBox::Slot()
-				.AutoWidth()
-				.Padding(2.0f)
-				[
 					SNew(SEditableTextBox)
 					.SelectAllTextWhenFocused(true)
 					.Text(this, &SDigitGolfConfigWindow::GetFilePath)
@@ -44,6 +36,20 @@ void SDigitGolfConfigWindow::Construct(const FArguments& InArgs)
 				[
 					SNew(SButton)
 					.Text(LOCTEXT("ChooseFile", "..."))
+					.OnClicked(this, &SDigitGolfConfigWindow::OnImportBtn)
+				]
+			]
+			+ SVerticalBox::Slot()
+			.AutoHeight()
+			.Padding(2.0f)
+			[
+				SNew(SHorizontalBox)
+				+SHorizontalBox::Slot()
+				.AutoWidth()
+				.Padding(2.0f)
+				[
+					SNew(SButton)
+					.Text(LOCTEXT("ImportBtn", "Import Scene"))
 					.OnClicked(this, &SDigitGolfConfigWindow::OnImportBtn)
 				]
 			]

@@ -200,9 +200,25 @@ void FDigitGolfModule::ImportScene(const FString& path)
 			}
 
 			TSharedPtr<FJsonObject> ProjectFile = LoadProjectFile(file_path[0]);
-			if (!ProjectFile.IsValid())
+			if (ProjectFile.IsValid())
 			{
-				int a = 1 + 1;
+				FString version = ProjectFile->GetStringField("version");
+				//TSharedPtr<FJsonObject> scene = ProjectFile->GetObjectField("scene");
+				TArray<TSharedPtr<FJsonValue>> nodes = ProjectFile->GetArrayField("scene");
+
+
+	
+				for (auto Itr(nodes.CreateIterator()); Itr; Itr++)
+				{
+					TSharedPtr<FJsonObject> node = (*Itr)->AsObject();
+					FString name = node->GetStringField("name");
+					UE_LOG(LogDigitGolf, Log, TEXT("name: %s"), *name);
+
+				}
+				
+
+				
+
 			}
 
 		}

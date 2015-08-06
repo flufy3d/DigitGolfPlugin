@@ -39,6 +39,8 @@ private:
 
 	TSharedRef<class SDockTab> OnSpawnPluginTab(const class FSpawnTabArgs& SpawnTabArgs);
 
+    void ParseNode( const TSharedPtr<FJsonObject>& node, AActor*  parent);
+
 private:
 	TSharedPtr<class FUICommandList> PluginCommands;
 

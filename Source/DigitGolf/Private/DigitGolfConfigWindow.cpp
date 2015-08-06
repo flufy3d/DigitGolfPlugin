@@ -1,6 +1,7 @@
 #include "DigitGolfPrivatePCH.h"
 #include "DigitGolfConfigWindow.h"
-
+#include "IDesktopPlatform.h"
+#include "DesktopPlatformModule.h"
 
 #define LOCTEXT_NAMESPACE "FDigitGolfModule"
 
@@ -36,7 +37,7 @@ void SDigitGolfConfigWindow::Construct(const FArguments& InArgs)
 				[
 					SNew(SButton)
 					.Text(LOCTEXT("ChooseFile", "..."))
-					.OnClicked(this, &SDigitGolfConfigWindow::OnImportBtn)
+                    .OnClicked( this, &SDigitGolfConfigWindow::OnChooseFileBtn )
 				]
 			]
 			+ SVerticalBox::Slot()
@@ -56,6 +57,37 @@ void SDigitGolfConfigWindow::Construct(const FArguments& InArgs)
 		]
 	];
 
+}
+
+FReply SDigitGolfConfigWindow::OnChooseFileBtn()
+{
+    TArray<FString> file_path;
+
+    void* ParentWindowPtr = FSlateApplication::Get().GetActiveTopLevelWindow()->GetNativeWindow()->GetOSWindowHandle();
+
+    if ( ParentWindowPtr )
+    {
+        IDesktopPlatform* DesktopPlatform = FDesktopPlatformModule::Get();
+
+        if ( DesktopPlatform )
+        {
+            FString FileTypes = TEXT( "Images (*.json)|*.json|All Files (*.*)|*.*" );
+
+            DesktopPlatform->OpenFileDialog(
+                ParentWindowPtr,
+                "ChooseSceneFile",
+                TEXT( "" ),
+                TEXT( "" ),
+                FileTypes,
+                EFileDialogFlags::None,
+                file_path
+                );
+        }
+    }
+
+    FilePath = file_path[0];
+
+    return FReply::Handled();
 }
 
 FReply SDigitGolfConfigWindow::OnImportBtn()

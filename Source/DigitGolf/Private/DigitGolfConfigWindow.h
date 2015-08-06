@@ -9,6 +9,7 @@ public:
 public:
 	void Construct(const FArguments& InArgs);
 	FReply OnImportBtn();
+    FReply OnChooseFileBtn();
 	void OnPortTextChanged(const FText& InText, ETextCommit::Type InCommitType);
 	FText GetFilePath() const;
 

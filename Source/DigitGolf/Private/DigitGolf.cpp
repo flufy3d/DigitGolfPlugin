@@ -163,108 +163,145 @@ TSharedPtr<FJsonObject> LoadProjectFile(const FString &FileName)
 
 	return JsonObject;
 }
+
+void FDigitGolfModule::ParseNode( const TSharedPtr<FJsonObject>& node, AActor*  parent)
+{
+
+    auto World = GEditor->GetEditorWorldContext().World();
+    ULevel* Level = World->GetCurrentLevel();
+
+
+    FString name = node->GetStringField( "name" );
+    UE_LOG( LogDigitGolf, Log, TEXT( "name: %s" ), *name );
+
+    
+    TSharedPtr<FJsonObject> trans = node->GetObjectField( "trans" );
+    TArray<TSharedPtr<FJsonValue>> loc = trans->GetArrayField( "loc" );
+    float loc_x = loc[0]->AsNumber();
+    float loc_y = loc[1]->AsNumber();
+    float loc_z = loc[2]->AsNumber();
+    TArray<TSharedPtr<FJsonValue>> scale = trans->GetArrayField( "scale" );
+    float scale_x = scale[0]->AsNumber();
+    float scale_y = scale[1]->AsNumber();
+    float scale_z = scale[2]->AsNumber();
+    TArray<TSharedPtr<FJsonValue>> rot = trans->GetArrayField( "rot" );
+    float rot_x = rot[0]->AsNumber();
+    float rot_y = rot[1]->AsNumber();
+    float rot_z = rot[2]->AsNumber();
+
+    UObject* Asset = GetAssetFromPath("/Script/Engine.Actor");
+    //FString asset_path = TEXT( "/Game/NineDragonsA/Object/o_jiulongrock3_.o_jiulongrock3_" );
+    //UObject* Asset = GetAssetFromPath( asset_path );
+    if ( Asset == NULL )
+    {
+        //UE_LOG( LogDigitGolf, Log, TEXT( "can not found asset: %s" ), *asset_path );
+        //return;
+    }
+
+    const FAssetData AssetData( Asset );
+
+    FText ErrorMessage;
+    AActor* Actor = NULL;
+
+    if ( EmptyActorFactory->CanCreateActorFrom( AssetData, ErrorMessage ) )
+    {
+        Actor = EmptyActorFactory->CreateActor( Asset, Level, FTransform::Identity,
+                                                     RF_Transactional );
+
+        Actor->SetActorLabel( name );
+
+        Actor->SetActorLocation( FVector( loc_x, loc_y, loc_z ) );
+        Actor->SetActorRotation( FRotator( rot_x, rot_y, rot_z ) );
+        Actor->SetActorScale3D( FVector( scale_x, scale_y, scale_z ) );
+
+    }
+    else
+    {
+        UE_LOG( LogDigitGolf, Log, TEXT( "error_msg :%s" ), *ErrorMessage.ToString() );
+    }
+
+
+    GEditor->ParentActors( parent, Actor ,NAME_None );
+
+
+    TArray<TSharedPtr<FJsonValue>> children = node->GetArrayField( "children" );
+    int num = children.Num();
+    if ( num > 0 )
+    {
+        for ( auto Itr( children.CreateIterator() ); Itr; Itr++ )
+        {
+            ParseNode( ( *Itr )->AsObject(), Actor );
+        }
+    }
+    
+}
+
 void FDigitGolfModule::ImportScene(const FString& path)
 {
 	UE_LOG(LogDigitGolf, Log, TEXT("ImportScene"));
-	UE_LOG(LogDigitGolf, Log, TEXT("___ %s ____ "), *path);
-
-	auto World = GEditor->GetEditorWorldContext().World();
-	ULevel* Level = World->GetCurrentLevel();
-
-	static AActor* myactor;
-	if (path.Equals("Add"))
-	{
-		UE_LOG(LogDigitGolf, Log, TEXT("ImportScene"));
-
-		TArray<FString> file_path;
-
-		void* ParentWindowPtr = FSlateApplication::Get().GetActiveTopLevelWindow()->GetNativeWindow()->GetOSWindowHandle();
-
-		if (ParentWindowPtr)
-		{
-			IDesktopPlatform* DesktopPlatform = FDesktopPlatformModule::Get();
-
-			if (DesktopPlatform)
-			{
-				FString FileTypes = TEXT("Images (*.json)|*.json|All Files (*.*)|*.*");
-
-				DesktopPlatform->OpenFileDialog(
-					ParentWindowPtr,
-					"ChooseSceneFile",
-					TEXT(""),
-					TEXT(""),
-					FileTypes,
-					EFileDialogFlags::None,
-					file_path
-					);
-			}
-
-			TSharedPtr<FJsonObject> ProjectFile = LoadProjectFile(file_path[0]);
-			if (ProjectFile.IsValid())
-			{
-				FString version = ProjectFile->GetStringField("version");
-				//TSharedPtr<FJsonObject> scene = ProjectFile->GetObjectField("scene");
-				TArray<TSharedPtr<FJsonValue>> nodes = ProjectFile->GetArrayField("scene");
+	UE_LOG(LogDigitGolf, Log, TEXT("scene file location :%s"), *path);
 
 
-	
-				for (auto Itr(nodes.CreateIterator()); Itr; Itr++)
-				{
-					TSharedPtr<FJsonObject> node = (*Itr)->AsObject();
-					FString name = node->GetStringField("name");
-					UE_LOG(LogDigitGolf, Log, TEXT("name: %s"), *name);
-
-				}
-				
-
-				
-
-			}
-
-		}
 
 
-		//UObject* Asset = GetAssetFromPath("/Script/Engine.Actor");
-		FString path = TEXT("/Game/NineDragonsA/Object/o_jiulongrock3_.o_jiulongrock3_");
-		UObject* Asset = GetAssetFromPath(path);
-		if (Asset == NULL)
-		{
-			UE_LOG(LogDigitGolf, Log, TEXT("can not found asset: %s"),*path);
-			return;
-		}
-			
-		const FAssetData AssetData(Asset);
+	UE_LOG(LogDigitGolf, Log, TEXT("ImportScene begin"));
+    
 
-		FText ErrorMessage;
-		AActor* Actor = NULL;
+    TSharedPtr<FJsonObject> ProjectFile = LoadProjectFile( path );
+    if ( ProjectFile.IsValid() )
+    {
 
-		if (StaticMeshActorFactory->CanCreateActorFrom(AssetData, ErrorMessage))
-		{
-			Actor = StaticMeshActorFactory->CreateActor(Asset, Level, FTransform::Identity,
-				RF_Transactional);
+        auto World = GEditor->GetEditorWorldContext().World();
+        ULevel* Level = World->GetCurrentLevel();
 
-			Actor->SetActorLabel(TEXT("kenshin1987"));
+        UObject* Asset = GetAssetFromPath( "/Script/Engine.Actor" );
+        const FAssetData AssetData( Asset );
 
-			Actor->SetActorLocation(FVector(0, 100,261));
-			Actor->SetActorRotation(FRotator(0, 0, 90));
-			Actor->SetActorScale3D(FVector(2, 2, 2));
-			myactor = Actor;
+        FText ErrorMessage;
+        AActor* Actor = NULL;
 
-		}
-		else
-		{
-			UE_LOG(LogDigitGolf, Log, TEXT("error_msg :%s"), *ErrorMessage.ToString());
-		}
+        if ( EmptyActorFactory->CanCreateActorFrom( AssetData, ErrorMessage ) )
+        {
+            Actor = EmptyActorFactory->CreateActor( Asset, Level, FTransform::Identity,
+                                                    RF_Transactional );
 
-	}
-	else if (path.Equals("Del"))
-	{
-		UE_LOG(LogDigitGolf, Log, TEXT("DelScene"));
-		auto World = GEditor->GetEditorWorldContext().World();
-		ULevel* Level = World->GetCurrentLevel();
-		World->DestroyActor(myactor);
-	}
-	
+            Actor->SetActorLabel( "Anchor" );
+
+            Actor->SetActorLocation( FVector( 0, 0, 0 ) );
+            Actor->SetActorRotation( FRotator( 0, 0, 0 ) );
+            Actor->SetActorScale3D( FVector( 1, 1, 1 ) );
+
+        }
+        else
+        {
+            UE_LOG( LogDigitGolf, Log, TEXT( "error_msg :%s" ), *ErrorMessage.ToString() );
+        }
+
+
+
+        FString version = ProjectFile->GetStringField( "version" );
+        TArray<TSharedPtr<FJsonValue>> nodes = ProjectFile->GetArrayField( "scene" );
+        
+        for ( auto Itr( nodes.CreateIterator() ); Itr; Itr++ )
+        {
+            ParseNode( ( *Itr )->AsObject(), Actor );
+        }
+    }
+
+    UE_LOG( LogDigitGolf, Log, TEXT( "ImportScene end" ) );
+
+
+    FNotificationInfo Info( LOCTEXT( "DigitGolfImportDoneMessage", "ImportScene Done!" ) );
+    Info.bFireAndForget = true;
+    Info.bUseThrobber = false;
+    Info.FadeOutDuration = 3.0f;
+    Info.ExpireDuration = 3.0f;
+
+    FSlateNotificationManager::Get().AddNotification( Info );
+
+    
+
+
 }
 void FDigitGolfModule::AddMenuExtension(FMenuBuilder& Builder)
 {

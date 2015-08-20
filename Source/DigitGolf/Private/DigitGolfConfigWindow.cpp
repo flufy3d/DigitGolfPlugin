@@ -6,6 +6,8 @@
 #define LOCTEXT_NAMESPACE "FDigitGolfModule"
 
 FString SDigitGolfConfigWindow::FilePath = FString(TEXT("Path/scene.json"));
+FString SDigitGolfConfigWindow::ObjSearchPath = FString( TEXT( "/Game/NineDragonsA/Object" ) );
+
 
 void SDigitGolfConfigWindow::Construct(const FArguments& InArgs)
 {
@@ -20,6 +22,14 @@ void SDigitGolfConfigWindow::Construct(const FArguments& InArgs)
 			.Padding(2.0f)
 			[
 				SNew(SHorizontalBox)
+                + SHorizontalBox::Slot()
+                .AutoWidth()
+                .Padding( 2.0f )
+                [
+                    SNew( STextBlock )
+                    .Text( LOCTEXT( "SceneFilePath", "Scene File Path : " ) )
+
+                ]
 				+SHorizontalBox::Slot()
 				.AutoWidth()
 				.Padding(2.0f)
@@ -28,8 +38,8 @@ void SDigitGolfConfigWindow::Construct(const FArguments& InArgs)
 					.SelectAllTextWhenFocused(true)
 					.Text(this, &SDigitGolfConfigWindow::GetFilePath)
 					.ToolTipText( LOCTEXT("PathTooltip", "set the Path of scene.json") )
-					.OnTextCommitted(this, &SDigitGolfConfigWindow::OnPortTextChanged)
-					.OnTextChanged(this, &SDigitGolfConfigWindow::OnPortTextChanged, ETextCommit::Default)
+					.OnTextCommitted(this, &SDigitGolfConfigWindow::OnScenePathTextChanged)
+					.OnTextChanged(this, &SDigitGolfConfigWindow::OnScenePathTextChanged, ETextCommit::Default)
 				]
 				+ SHorizontalBox::Slot()
 				.AutoWidth()
@@ -38,6 +48,31 @@ void SDigitGolfConfigWindow::Construct(const FArguments& InArgs)
 					SNew(SButton)
 					.Text(LOCTEXT("ChooseFile", "..."))
                     .OnClicked( this, &SDigitGolfConfigWindow::OnChooseFileBtn )
+				]
+			]
+			+ SVerticalBox::Slot()
+			.AutoHeight()
+			.Padding(2.0f)
+			[
+				SNew(SHorizontalBox)
+				+SHorizontalBox::Slot()
+				.AutoWidth()
+				.Padding(2.0f)
+				[
+                    SNew( STextBlock )
+					.Text(LOCTEXT("ObjSeaPath", "Object Search Path : "))
+
+				]
+				+SHorizontalBox::Slot()
+				.AutoWidth()
+				.Padding(2.0f)
+				[
+					SNew(SEditableTextBox)
+					.SelectAllTextWhenFocused(true)
+                    .Text( this, &SDigitGolfConfigWindow::GetObjSearchPath )
+					.ToolTipText( LOCTEXT("ObjSearchPath", "Object Search Path") )
+                    .OnTextCommitted( this, &SDigitGolfConfigWindow::OnObjSearchPathTextChanged )
+                    .OnTextChanged( this, &SDigitGolfConfigWindow::OnObjSearchPathTextChanged, ETextCommit::Default )
 				]
 			]
 			+ SVerticalBox::Slot()
@@ -93,11 +128,11 @@ FReply SDigitGolfConfigWindow::OnChooseFileBtn()
 FReply SDigitGolfConfigWindow::OnImportBtn()
 {	
 	FDigitGolfModule& module = FDigitGolfModule::Get();
-	module.ImportScene(FilePath);
+	module.ImportScene(FilePath,ObjSearchPath);
 	return FReply::Handled();
 }
 
-void SDigitGolfConfigWindow::OnPortTextChanged(const FText& InText, ETextCommit::Type InCommitType)
+void SDigitGolfConfigWindow::OnScenePathTextChanged(const FText& InText, ETextCommit::Type InCommitType)
 {
 	FilePath = InText.ToString();
 }
@@ -106,5 +141,14 @@ FText SDigitGolfConfigWindow::GetFilePath() const
 {
 	return FText::FromString(FilePath);
 }
+void SDigitGolfConfigWindow::OnObjSearchPathTextChanged( const FText& InText, ETextCommit::Type InCommitType )
+{
+    ObjSearchPath = InText.ToString();
+}
+FText SDigitGolfConfigWindow::GetObjSearchPath() const
+{
+    return FText::FromString( ObjSearchPath );
+}
+
 
 #undef LOCTEXT_NAMESPACE

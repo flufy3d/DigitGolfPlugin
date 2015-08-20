@@ -189,39 +189,71 @@ void FDigitGolfModule::ParseNode( const TSharedPtr<FJsonObject>& node, AActor*  
     float rot_y = rot[1]->AsNumber();
     float rot_z = rot[2]->AsNumber();
 
-    UObject* Asset = GetAssetFromPath("/Script/Engine.Actor");
-    //FString asset_path = TEXT( "/Game/NineDragonsA/Object/o_jiulongrock3_.o_jiulongrock3_" );
-    //UObject* Asset = GetAssetFromPath( asset_path );
-    if ( Asset == NULL )
-    {
-        //UE_LOG( LogDigitGolf, Log, TEXT( "can not found asset: %s" ), *asset_path );
-        //return;
-    }
 
-    const FAssetData AssetData( Asset );
+    //ObjSearchPath
+    int search_index = -1;
+    name.FindLastChar( '_', search_index );
+    FString asset_name = name.Left( search_index + 1 );
+    asset_name = ObjSearchPath  + '/' + asset_name + '.' + asset_name;
 
-    FText ErrorMessage;
+    FString asset_path = asset_name;
+    UObject* Asset = GetAssetFromPath( asset_path );
     AActor* Actor = NULL;
+    FText ErrorMessage;
 
-    if ( EmptyActorFactory->CanCreateActorFrom( AssetData, ErrorMessage ) )
+    if ( Asset != NULL )
     {
-        Actor = EmptyActorFactory->CreateActor( Asset, Level, FTransform::Identity,
-                                                     RF_Transactional );
+        const FAssetData AssetData( Asset );
+       
 
-        Actor->SetActorLabel( name );
+        if ( StaticMeshActorFactory->CanCreateActorFrom( AssetData, ErrorMessage ) )
+        {
+            Actor = StaticMeshActorFactory->CreateActor( Asset, Level, FTransform::Identity,
+                                                    RF_Transactional );
 
-        Actor->SetActorLocation( FVector( loc_x, loc_y, loc_z ) );
-        Actor->SetActorRotation( FRotator( rot_x, rot_y, rot_z ) );
-        Actor->SetActorScale3D( FVector( scale_x, scale_y, scale_z ) );
+            Actor->SetActorLabel( name );
+
+            Actor->SetActorLocation( FVector( loc_x, loc_y, loc_z ) );
+            Actor->SetActorRotation( FRotator( rot_x, rot_y, rot_z ) );
+            Actor->SetActorScale3D( FVector( scale_x, scale_y, scale_z ) );
+            Actor->GetRootComponent()->SetMobility( EComponentMobility::Movable );
+
+        }
+        else
+        {
+            UE_LOG( LogDigitGolf, Log, TEXT( "error_msg :%s" ), *ErrorMessage.ToString() );
+        }
 
     }
     else
     {
-        UE_LOG( LogDigitGolf, Log, TEXT( "error_msg :%s" ), *ErrorMessage.ToString() );
+        Asset = GetAssetFromPath( "/Script/Engine.Actor" );
+
+
+        const FAssetData AssetData( Asset );
+
+
+        if ( EmptyActorFactory->CanCreateActorFrom( AssetData, ErrorMessage ) )
+        {
+            Actor = EmptyActorFactory->CreateActor( Asset, Level, FTransform::Identity,
+                                                    RF_Transactional );
+
+            Actor->SetActorLabel( name );
+
+            Actor->SetActorLocation( FVector( loc_x, loc_y, loc_z ) );
+            Actor->SetActorRotation( FRotator( rot_x, rot_y, rot_z ) );
+            Actor->SetActorScale3D( FVector( scale_x, scale_y, scale_z ) );
+
+        }
+        else
+        {
+            UE_LOG( LogDigitGolf, Log, TEXT( "error_msg :%s" ), *ErrorMessage.ToString() );
+        }
+
     }
 
 
-    GEditor->ParentActors( parent, Actor ,NAME_None );
+    GEditor->ParentActors( parent, Actor, NAME_None );
 
 
     TArray<TSharedPtr<FJsonValue>> children = node->GetArrayField( "children" );
@@ -236,12 +268,12 @@ void FDigitGolfModule::ParseNode( const TSharedPtr<FJsonObject>& node, AActor*  
     
 }
 
-void FDigitGolfModule::ImportScene(const FString& path)
+void FDigitGolfModule::ImportScene( const FString& path, const FString& objSearchPath )
 {
 	UE_LOG(LogDigitGolf, Log, TEXT("ImportScene"));
 	UE_LOG(LogDigitGolf, Log, TEXT("scene file location :%s"), *path);
 
-
+    ObjSearchPath = objSearchPath;
 
 
 	UE_LOG(LogDigitGolf, Log, TEXT("ImportScene begin"));

@@ -14,9 +14,12 @@ public:
 	FText GetFilePath() const;
     void OnObjSearchPathTextChanged( const FText& InText, ETextCommit::Type InCommitType );
     FText GetObjSearchPath() const;
+    void OnCommonSearchPathTextChanged( const FText& InText, ETextCommit::Type InCommitType );
+    FText GetCommonSearchPath() const;
 
 private:
 	static FString FilePath;
     static FString ObjSearchPath;
+    static FString CommonSearchPath;
 	
 };

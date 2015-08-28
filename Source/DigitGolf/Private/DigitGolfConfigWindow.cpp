@@ -7,6 +7,7 @@
 
 FString SDigitGolfConfigWindow::FilePath = FString(TEXT("Path/scene.json"));
 FString SDigitGolfConfigWindow::ObjSearchPath = FString( TEXT( "/Game/NineDragonsA/Object" ) );
+FString SDigitGolfConfigWindow::CommonSearchPath = FString( TEXT( "/Game/Common" ) );
 
 
 void SDigitGolfConfigWindow::Construct(const FArguments& InArgs)
@@ -84,6 +85,31 @@ void SDigitGolfConfigWindow::Construct(const FArguments& InArgs)
 				.AutoWidth()
 				.Padding(2.0f)
 				[
+                    SNew( STextBlock )
+					.Text(LOCTEXT("CommonSeaPath", "Common Search Path : "))
+
+				]
+				+SHorizontalBox::Slot()
+				.AutoWidth()
+				.Padding(2.0f)
+				[
+					SNew(SEditableTextBox)
+					.SelectAllTextWhenFocused(true)
+                    .Text( this, &SDigitGolfConfigWindow::GetCommonSearchPath )
+					.ToolTipText( LOCTEXT("CommonSearchPath", "Common Search Path") )
+                    .OnTextCommitted( this, &SDigitGolfConfigWindow::OnCommonSearchPathTextChanged )
+                    .OnTextChanged( this, &SDigitGolfConfigWindow::OnCommonSearchPathTextChanged, ETextCommit::Default )
+				]
+			]
+			+ SVerticalBox::Slot()
+			.AutoHeight()
+			.Padding(2.0f)
+			[
+				SNew(SHorizontalBox)
+				+SHorizontalBox::Slot()
+				.AutoWidth()
+				.Padding(2.0f)
+				[
 					SNew(SButton)
 					.Text(LOCTEXT("ImportBtn", "Import Scene"))
 					.OnClicked(this, &SDigitGolfConfigWindow::OnImportBtn)
@@ -128,7 +154,7 @@ FReply SDigitGolfConfigWindow::OnChooseFileBtn()
 FReply SDigitGolfConfigWindow::OnImportBtn()
 {	
 	FDigitGolfModule& module = FDigitGolfModule::Get();
-	module.ImportScene(FilePath,ObjSearchPath);
+	module.ImportScene(FilePath,ObjSearchPath,CommonSearchPath);
 	return FReply::Handled();
 }
 
@@ -148,6 +174,16 @@ void SDigitGolfConfigWindow::OnObjSearchPathTextChanged( const FText& InText, ET
 FText SDigitGolfConfigWindow::GetObjSearchPath() const
 {
     return FText::FromString( ObjSearchPath );
+}
+
+
+void SDigitGolfConfigWindow::OnCommonSearchPathTextChanged( const FText& InText, ETextCommit::Type InCommitType )
+{
+    CommonSearchPath = InText.ToString();
+}
+FText SDigitGolfConfigWindow::GetCommonSearchPath() const
+{
+    return FText::FromString( CommonSearchPath );
 }
 
 

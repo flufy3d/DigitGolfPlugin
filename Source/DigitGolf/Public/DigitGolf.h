@@ -29,7 +29,7 @@ public:
 	/** This function will be bound to Command (by default it will bring up plugin window) */
 	void PluginButtonClicked();
 
-	void ImportScene(const FString& path,const FString& objSearchPath);
+    void ImportScene( const FString& path, const FString& objSearchPath, const FString& commonSearchPath );
 private:
 
 	void AddToolbarExtension(FToolBarBuilder& Builder);
@@ -49,4 +49,5 @@ private:
 	UActorFactory* StaticMeshActorFactory;
 
     FString ObjSearchPath;
+    FString CommonSearchPath;
 };

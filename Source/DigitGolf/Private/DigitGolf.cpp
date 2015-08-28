@@ -190,16 +190,26 @@ void FDigitGolfModule::ParseNode( const TSharedPtr<FJsonObject>& node, AActor*  
     float rot_z = rot[2]->AsNumber();
 
 
-    //ObjSearchPath
     int search_index = -1;
     name.FindLastChar( '_', search_index );
     FString asset_name = name.Left( search_index + 1 );
-    asset_name = ObjSearchPath  + '/' + asset_name + '.' + asset_name;
+    asset_name = CommonSearchPath + '/' + asset_name + '.' + asset_name;
 
     FString asset_path = asset_name;
     UObject* Asset = GetAssetFromPath( asset_path );
     AActor* Actor = NULL;
     FText ErrorMessage;
+
+    if ( Asset == NULL )
+    {
+        search_index = -1;
+        name.FindLastChar( '_', search_index );
+        asset_name = name.Left( search_index + 1 );
+        asset_name = ObjSearchPath + '/' + asset_name + '.' + asset_name;
+
+        asset_path = asset_name;
+        Asset = GetAssetFromPath( asset_path );
+    }
 
     if ( Asset != NULL )
     {
@@ -268,12 +278,13 @@ void FDigitGolfModule::ParseNode( const TSharedPtr<FJsonObject>& node, AActor*  
     
 }
 
-void FDigitGolfModule::ImportScene( const FString& path, const FString& objSearchPath )
+void FDigitGolfModule::ImportScene( const FString& path, const FString& objSearchPath ,const FString& commonSearchPath )
 {
 	UE_LOG(LogDigitGolf, Log, TEXT("ImportScene"));
 	UE_LOG(LogDigitGolf, Log, TEXT("scene file location :%s"), *path);
 
     ObjSearchPath = objSearchPath;
+    CommonSearchPath = commonSearchPath;
 
 
 	UE_LOG(LogDigitGolf, Log, TEXT("ImportScene begin"));

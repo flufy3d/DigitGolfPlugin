@@ -193,7 +193,7 @@ void FDigitGolfModule::ParseNode( const TSharedPtr<FJsonObject>& node, AActor*  
     int search_index = -1;
     name.FindLastChar( '_', search_index );
     FString asset_name = name.Left( search_index + 1 );
-    asset_name = CommonSearchPath + '/' + asset_name + '.' + asset_name;
+	asset_name = ObjSearchPath + '/' + asset_name + '.' + asset_name;
 
     FString asset_path = asset_name;
     UObject* Asset = GetAssetFromPath( asset_path );
@@ -205,7 +205,7 @@ void FDigitGolfModule::ParseNode( const TSharedPtr<FJsonObject>& node, AActor*  
         search_index = -1;
         name.FindLastChar( '_', search_index );
         asset_name = name.Left( search_index + 1 );
-        asset_name = ObjSearchPath + '/' + asset_name + '.' + asset_name;
+		asset_name = CommonSearchPath + '/' + asset_name + '.' + asset_name;
 
         asset_path = asset_name;
         Asset = GetAssetFromPath( asset_path );
